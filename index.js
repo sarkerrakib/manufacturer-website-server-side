@@ -19,6 +19,7 @@ async function run() {
   try {
     await client.connect();
     const serviceCollection = client.db('manufacturer').collection('services');
+    const ordersCollection = client.db('manufacturer').collection('orders');
 
     app.get('/store', async (req, res) => {
       const query = {};
@@ -27,45 +28,51 @@ async function run() {
       res.send(services);
     });
 
-    app.get('/store/:id', async(req, res) =>{
+    app.get('/store/:id', async (req, res) => {
       const id = req.params.id;
-      const query={_id: ObjectId(id)};
+      const query = { _id: ObjectId(id) };
       const store = await serviceCollection.findOne(query);
       res.send(store);
     })
+    app.get('/order/:email', async (req, res) => {
+      const email = req.params.email;
+      const query = {email:email };
+      const store = await ordersCollection.find(query).toArray();
+      res.send(store);
+    })
 
-    app.get('/purchase', async (req, res) => {
-      const query = {};
-      const cursor = serviceCollection.find(query);
-      const services = await cursor.toArray();
-      res.send(services);
-    });
+    // app.get('/purchase', async (req, res) => {
+    //   const query = {};
+    //   const cursor = serviceCollection.find(query);
+    //   const services = await cursor.toArray();
+    //   res.send(services);
+    // });
 
     // Post
-    app.post('/store', async(req, res) =>{
+    app.post('/store', async (req, res) => {
       const newService = req.body;
-      const result = await serviceCollection.insertOne(newService)
+      const result = await ordersCollection.insertOne(newService)
       res.send(result);
-  });
+    });
 
-    app.put('/delivered/:id',async(req,res)=>{
+    app.put('/delivered/:id', async (req, res) => {
       const id = req.params.id;
-      const updataquantity= req.body.quantity
-      const updateSell= req.body.sell
+      const updataquantity = req.body.quantity
+      const updateSell = req.body.sell
       // console.log(req.body);
-      const filter = {_id:ObjectId(id)}
+      const filter = { _id: ObjectId(id) }
       const options = { upsert: true };
       const updateDoc = {
         $set: {
           quantity: updataquantity,
-          sell : updateSell
+          sell: updateSell
         },
       };
       const result = await serviceCollection.updateOne(filter, updateDoc, options);
       res.send(result)
     })
 
-    
+
   }
   finally {
 
@@ -79,7 +86,7 @@ app.get('/', (req, res) => {
   res.send('Manufacturer server!')
 });
 
-app.get('/server', (req, res) =>{
+app.get('/server', (req, res) => {
   res.send('run server')
 });
 
