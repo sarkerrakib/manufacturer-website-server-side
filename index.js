@@ -34,6 +34,7 @@ async function run() {
       const store = await serviceCollection.findOne(query);
       res.send(store);
     })
+    //  my orders from dashboard
     app.get('/order/:email', async (req, res) => {
       const email = req.params.email;
       const query = {email:email };
